@@ -106,9 +106,6 @@ fs.readdir(RAW_DIR_PATH, (err, files) => {
 
       readJobs(sourceFilePath,
         job => {
-          if (!job.html_job_description) job.html_job_description = ''
-          if (!job.job_description) job.job_description = ''
-
           const normalizedJob = normalizeJob(job, allPresentedFields)
           csvStream.write(normalizedJob)
 
