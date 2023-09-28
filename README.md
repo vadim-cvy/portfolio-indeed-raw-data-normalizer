@@ -24,6 +24,6 @@ Source: [https://data.world/search?entryTypeLabel=dataset&q=indeed&type=resource
 
 ## Result
 
-Total jobs: 119,895;
+Total jobs: 119,895.
 
 Output file size: ~500 MB.
