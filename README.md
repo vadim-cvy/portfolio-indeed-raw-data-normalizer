@@ -1,4 +1,4 @@
-# Normalize raw data to make it importable into the database
+# Normalize raw data: make it importable into the database
 
 `normalize-data.js` script gets multiple `jsonld` dataset files of Indeed archive job postings as an input and outputs a single normalized csv document which can be used to be imported into DB.
 
@@ -25,4 +25,5 @@ Source: [https://data.world/search?entryTypeLabel=dataset&q=indeed&type=resource
 ## Result
 
 Total jobs: 119,895;
+
 Output file size: ~500 MB.
