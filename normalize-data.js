@@ -4,7 +4,7 @@ const readline = require('readline')
 const fastcsv = require('fast-csv')
 
 const RAW_DIR_PATH = './data/raw/'
-const NORMALIZED_DIR_PATH = './data/normalized/'
+const NORMALIZED_FILE_PATH = './data/normalized/normalized.csv'
 
 const normalizeJob = (job, allPresentedFields) => {
   // Populate missed fields
@@ -47,77 +47,95 @@ const normalizeJob = (job, allPresentedFields) => {
   return job
 }
 
-const readJobs = (filePath, onJobCb, onComplete) => {
-  const readInterface = readline.createInterface({
-    input: fs.createReadStream(filePath),
-    console: false
-  })
+const readJobs = async (filePath, onJobCb, onComplete) => {
+  return new Promise( resolve => {
+    const readInterface = readline.createInterface({
+      input: fs.createReadStream(filePath),
+      console: false
+    })
 
-  let lineNumber = 0
+    let lineNumber = 0
 
-  readInterface.on('line', line => {
-    lineNumber++
-    let job
-    try {
-      job = JSON.parse(line)
-    } catch (error) {
-      console.error(`Error parsing line ${lineNumber}:`, error)
-      return
-    }
+    readInterface.on('line', line => {
+      lineNumber++
+      let job
+      try {
+        job = JSON.parse(line)
+      } catch (error) {
+        console.error(`Error parsing line ${filePath}:${lineNumber}`)
+        return
+      }
 
-    onJobCb(job)
-  })
+      onJobCb(job)
+    })
 
-  readInterface.on('close', onComplete)
-  readInterface.on('error', err => {
-    throw new Error(err)
-  })
-}
+    readInterface.on('close', resolve)
 
-const getAllPresentedFields = filePath => {
-  return new Promise(resolve => {
-    const fields = new Set()
-
-    readJobs(filePath,
-      job => Object.keys(job).forEach(field => fields.add(field)),
-      () => resolve(fields)
-    )
-  })
-}
-
-fs.readdir(RAW_DIR_PATH, (err, files) => {
-  if (err) {
-    console.error("Error reading the directory:", err)
-    return
-  }
-
-  files.forEach(file => {
-    const sourceFilePath = path.join(RAW_DIR_PATH, file)
-    const destinationFilePath = path.join(NORMALIZED_DIR_PATH, file) + '.csv'
-
-    getAllPresentedFields(sourceFilePath).then(allPresentedFields => {
-      let isFirstLine = true
-
-      const csvStream = fastcsv.format({ headers: true, writeHeaders: isFirstLine })
-      const writeStream = fs.createWriteStream(destinationFilePath)
-        .on('error', err => console.error('Error writing to file:', err))
-
-      csvStream.pipe(writeStream)
-
-      readJobs(sourceFilePath,
-        job => {
-          const normalizedJob = normalizeJob(job, allPresentedFields)
-          csvStream.write(normalizedJob)
-
-          if (isFirstLine) isFirstLine = false
-        },
-        () => {
-          csvStream.end()
-          console.log(`"${sourceFilePath}" - ready!`)
-        }
-      )
-    }).catch(error => {
-      console.error('Error processing file:', sourceFilePath, error)
+    readInterface.on('error', err => {
+      throw new Error(err)
     })
   })
-})
+}
+
+const getAllPresentedFields = async filePath => {
+  return new Promise(resolve => {
+    const fields = new Set();
+
+    readJobs(filePath, job =>
+      Object.keys(job).forEach(field => fields.add(field))
+    )
+    .then( () => resolve( fields ) )
+  })
+}
+
+const readdir = dir => {
+  return new Promise((resolve, reject) => {
+    fs.readdir(dir, (err, filePathes) => {
+      if (err) reject(err);
+      else resolve(filePathes.map(filePath => RAW_DIR_PATH + filePath ));
+    });
+  });
+}
+
+
+
+
+
+readdir(RAW_DIR_PATH).then(async filePathes => {
+  const handledJobsIds = new Set()
+
+  const allPresentedFields = new Set()
+
+  for (let filePath of filePathes) {
+    (await getAllPresentedFields(filePath)).forEach( fieldName => allPresentedFields.add( fieldName ) )
+  }
+
+  const csvStream = fastcsv.format({ headers: true, writeHeaders: true });
+  const writeStream = fs.createWriteStream(NORMALIZED_FILE_PATH)
+    .on('error', err => console.error('Error writing to file:', err));
+
+  csvStream.pipe(writeStream);
+
+  for (let filePath of filePathes) {
+    await readJobs(filePath, job => {
+      if (handledJobsIds.has(job.uniq_id)) {
+        console.log( 'Duplicate job: ' + job.uniq_id )
+        return;
+      }
+
+      handledJobsIds.add(job.uniq_id);
+
+      const normalizedJob = normalizeJob(job, allPresentedFields);
+
+      csvStream.write(normalizedJob);
+    });
+
+    console.log(`"${filePath}" - ready!`)
+  }
+
+  csvStream.end();
+
+  console.log( `Total unique jobs: ${handledJobsIds.size}` )
+}).catch(err => {
+  console.error("Error reading the directory:", err);
+});
