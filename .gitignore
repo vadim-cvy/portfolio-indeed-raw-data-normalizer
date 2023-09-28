@@ -1,0 +1,8 @@
+package-lock.json
+node_modules
+
+data/raw/*
+data/normalized/*
+
+!data/raw/usa_20201001_20201231.example.ldjson
+!data/normalized/usa_20201001_20201231.example.ldjson.csv
