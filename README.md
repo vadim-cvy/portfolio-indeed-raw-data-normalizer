@@ -2,7 +2,7 @@
 
 ## Filter and normalize the dataset
 
-`raw-data-to-csv.js` script gets multiple `jsonld` dataset files of Indeed archive job postings as an input and outputs a single normalized csv document which can be used to be imported into DB.
+`raw-data-to-csv.js` script gets multiple `jsonld` dataset files of Indeed archive job postings (located in `/dataset/raw/` dir) as an input and outputs a single normalized csv document (`/dataset/normalized/normalized.csv`) which can be imported into DB.
 
 Features:
 1. Removes useless data such as dataset related fields and unneded job fields (apply URL, etc).

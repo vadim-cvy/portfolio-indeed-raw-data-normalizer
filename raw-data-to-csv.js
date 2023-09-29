@@ -2,8 +2,8 @@ const fs = require('fs')
 const readline = require('readline')
 const fastcsv = require('fast-csv')
 
-const RAW_DIR_PATH = './data/raw/'
-const NORMALIZED_FILE_PATH = './data/normalized/normalized.csv'
+const RAW_DIR_PATH = './dataset/raw/'
+const NORMALIZED_FILE_PATH = './dataset/normalized/normalized.csv'
 
 const normalizeJob = (job, allPresentedFields) => {
   // Populate missed fields
