@@ -6,10 +6,14 @@ const RAW_DIR_PATH = './dataset/raw/'
 const NORMALIZED_FILE_PATH = './dataset/normalized/normalized.csv'
 
 const normalizeJob = (job, allPresentedFields) => {
-  // Populate missed fields
   allPresentedFields.forEach(fieldName => {
     if (!job.hasOwnProperty(fieldName)) {
       job[fieldName] = ''
+    }
+
+    if ( typeof job[fieldName] === 'boolean' )
+    {
+      job[fieldName] = + job[fieldName]
     }
   })
 

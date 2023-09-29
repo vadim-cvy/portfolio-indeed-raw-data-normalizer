@@ -8,7 +8,8 @@ Features:
 1. Removes useless data such as dataset related fields and unneded job fields (apply URL, etc).
 2. Removes plain text description (leaves html only).
 3. Normalizes json structure between different input documents (one document may miss the fields presented in another one).
-4. Filters duplicate jobs between different input documents.
+4. Normalizes some column values to make the output file size smaller.
+5. Filters duplicate jobs between different input documents.
 
 ### Input data
 
