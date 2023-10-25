@@ -29,7 +29,7 @@ getColumnNames().then( columnNames =>
   let sql = `CREATE TABLE ${DB_TABLE_NAME} (\n`
 
   sql += columnNames
-    .map( columnName => `  ${columnName} TEXT` )
+    .map( columnName => `  ${columnName} NOT NULL TEXT` )
     .join( ',\n' )
 
   sql += ',\n'
